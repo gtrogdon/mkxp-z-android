@@ -189,11 +189,11 @@ public class Gamepad
                 break;
 
             case KeyEvent.KEYCODE_BUTTON_START:
-                keycode = mGamepadConfig.keycodeW;
+                keycode = mGamepadConfig.keycodeR;
                 break;
 
             case KeyEvent.KEYCODE_BUTTON_SELECT:
-                keycode = mGamepadConfig.keycodeQ;
+                keycode = mGamepadConfig.keycodeL;
                 break;
 
             case KeyEvent.KEYCODE_BUTTON_L2:
