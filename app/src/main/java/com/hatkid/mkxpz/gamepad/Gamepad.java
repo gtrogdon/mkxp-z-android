@@ -177,43 +177,29 @@ public class Gamepad
         switch(keycode)
         {
             case KeyEvent.KEYCODE_BUTTON_A:
-                keycode = mGamepadConfig.keycodeA;
-                break;
-
-            case KeyEvent.KEYCODE_BUTTON_B:
-                keycode = mGamepadConfig.keycodeB;
-                break;
-
-            case KeyEvent.KEYCODE_BUTTON_C:
                 keycode = mGamepadConfig.keycodeC;
                 break;
 
-            case KeyEvent.KEYCODE_BUTTON_X:
+            case KeyEvent.KEYCODE_BUTTON_B:
                 keycode = mGamepadConfig.keycodeX;
                 break;
 
-            case KeyEvent.KEYCODE_BUTTON_Y:
-                keycode = mGamepadConfig.keycodeY;
+            case KeyEvent.KEYCODE_BUTTON_X:
+                keycode = mGamepadConfig.keycodeA;
                 break;
 
-            case KeyEvent.KEYCODE_BUTTON_Z:
-                keycode = mGamepadConfig.keycodeZ;
+            case KeyEvent.KEYCODE_BUTTON_START:
+                keycode = mGamepadConfig.keycodeW;
                 break;
 
-            case KeyEvent.KEYCODE_BUTTON_L1:
-                keycode = mGamepadConfig.keycodeL;
-                break;
-
-            case KeyEvent.KEYCODE_BUTTON_R1:
-                keycode = mGamepadConfig.keycodeR;
+            case KeyEvent.KEYCODE_BUTTON_SELECT:
+                keycode = mGamepadConfig.keycodeQ;
                 break;
 
             case KeyEvent.KEYCODE_BUTTON_L2:
             case KeyEvent.KEYCODE_BUTTON_R2:
             case KeyEvent.KEYCODE_BUTTON_THUMBL:
             case KeyEvent.KEYCODE_BUTTON_THUMBR:
-            case KeyEvent.KEYCODE_BUTTON_START:
-            case KeyEvent.KEYCODE_BUTTON_SELECT:
             default:
                 return false;
         }
