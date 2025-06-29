@@ -174,6 +174,50 @@ public class Gamepad
 
         int keycode = evt.getKeyCode();
 
+        switch(keycode)
+        {
+            case KeyEvent.KEYCODE_BUTTON_A:
+                keycode = mGamepadConfig.keycodeA;
+                break;
+
+            case KeyEvent.KEYCODE_BUTTON_B:
+                keycode = mGamepadConfig.keycodeB;
+                break;
+
+            case KeyEvent.KEYCODE_BUTTON_C:
+                keycode = mGamepadConfig.keycodeC;
+                break;
+
+            case KeyEvent.KEYCODE_BUTTON_X:
+                keycode = mGamepadConfig.keycodeX;
+                break;
+
+            case KeyEvent.KEYCODE_BUTTON_Y:
+                keycode = mGamepadConfig.keycodeY;
+                break;
+
+            case KeyEvent.KEYCODE_BUTTON_Z:
+                keycode = mGamepadConfig.keycodeZ;
+                break;
+
+            case KeyEvent.KEYCODE_BUTTON_L1:
+                keycode = mGamepadConfig.keycodeL;
+                break;
+
+            case KeyEvent.KEYCODE_BUTTON_R1:
+                keycode = mGamepadConfig.keycodeR;
+                break;
+
+            case KeyEvent.KEYCODE_BUTTON_L2:
+            case KeyEvent.KEYCODE_BUTTON_R2:
+            case KeyEvent.KEYCODE_BUTTON_THUMBL:
+            case KeyEvent.KEYCODE_BUTTON_THUMBR:
+            case KeyEvent.KEYCODE_BUTTON_START:
+            case KeyEvent.KEYCODE_BUTTON_SELECT:
+            default:
+                return false;
+        }
+
         switch (evt.getAction())
         {
             case MotionEvent.ACTION_DOWN:
