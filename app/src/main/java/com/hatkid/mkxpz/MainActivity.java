@@ -251,6 +251,21 @@ public class MainActivity extends SDLActivity
         return super.onGenericMotionEvent(evt);
     }
 
+    // Handle game controller and keyboard key down events
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+	if (mGamepad.processGamepadEvent(evt))
+            return true;
+
+        return super.onKeyDown(keyCode, event);
+    }
+
+    // Handle game controller and keyboard key up events
+    @Override
+    public boolean onKeyUp(int keyCode, KeyEvent event) {
+        return super.onKeyUp(keyCode, event);
+    }
+
     /**
      * This method is for arguments for launching native mkxp-z.
      * 
