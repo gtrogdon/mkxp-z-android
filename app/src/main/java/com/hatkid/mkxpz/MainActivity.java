@@ -254,9 +254,6 @@ public class MainActivity extends SDLActivity
     // Handle game controller and keyboard key down events
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-	if (mGamepad.processGamepadEvent(event))
-            return true;
-
         return super.onKeyDown(keyCode, event);
     }
 
