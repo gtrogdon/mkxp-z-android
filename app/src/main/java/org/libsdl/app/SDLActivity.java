@@ -33,6 +33,7 @@ import android.view.Display;
 import android.view.Gravity;
 import android.view.InputDevice;
 import android.view.KeyEvent;
+import android.view.MotionEvent;
 import android.view.PointerIcon;
 import android.view.Surface;
 import android.view.View;
@@ -1859,6 +1860,34 @@ public class SDLActivity extends Activity implements View.OnSystemUiVisibilityCh
             return -1;
         }
         return 0;
+    }
+
+    // Handle game controller and keyboard key down events
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        // Forward to native code (SDL2)
+        onNativeKeyDown(keyCode);
+        return super.onKeyDown(keyCode, event);
+    }
+
+    // Handle game controller and keyboard key up events
+    @Override
+    public boolean onKeyUp(int keyCode, KeyEvent event) {
+        // Forward to native code (SDL2)
+        onNativeKeyUp(keyCode);
+        return super.onKeyUp(keyCode, event);
+    }
+
+    // Handle joystick and trigger motion events
+    @Override
+    public boolean onGenericMotionEvent(MotionEvent event) {
+        // Forward to SDL2 for joystick/trigger support
+        if ((event.getSource() & InputDevice.SOURCE_JOYSTICK) == InputDevice.SOURCE_JOYSTICK ||
+            (event.getSource() & InputDevice.SOURCE_GAMEPAD) == InputDevice.SOURCE_GAMEPAD) {
+            // You may want to add custom handling here if needed
+            return super.onGenericMotionEvent(event);
+        }
+        return super.onGenericMotionEvent(event);
     }
 }
 
