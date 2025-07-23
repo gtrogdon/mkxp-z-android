@@ -33,6 +33,8 @@ import org.libsdl.app.SDLActivity;
 import com.hatkid.mkxpz.BuildConfig;
 import com.hatkid.mkxpz.gamepad.Gamepad;
 import com.hatkid.mkxpz.gamepad.GamepadConfig;
+import androidx.drawerlayout.widget.DrawerLayout;
+import com.google.android.material.navigation.NavigationView;
 
 public class MainActivity extends SDLActivity
 {
@@ -56,6 +58,10 @@ public class MainActivity extends SDLActivity
     // In-screen gamepad
     private final Gamepad mGamepad = new Gamepad();
     private boolean mGamepadInvisible = false;
+
+    private DrawerLayout drawerLayout;
+    private NavigationView navigationView;
+    private LeftDrawerMenu leftDrawerMenu;
 
     private void runSDLThread()
     {
@@ -117,6 +123,11 @@ public class MainActivity extends SDLActivity
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main_drawer);
+
+        drawerLayout = findViewById(R.id.drawer_layout);
+        navigationView = findViewById(R.id.navigation_view);
+        leftDrawerMenu = new LeftDrawerMenu(this, drawerLayout, navigationView);
 
         mMainHandler = new Handler(getMainLooper());
 
