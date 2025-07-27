@@ -2,7 +2,7 @@
 <resources>
     <!-- You can make custom themes with custom style items for activities and views here. -->
 
-    <style name="AppTheme" parent="android:Theme.Material">
+    <style name="AppTheme" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
         <!-- Custom style items for main theme goes here. -->
         <item name="android:windowFullscreen">true</item>
         <item name="android:windowNoTitle">true</item>
