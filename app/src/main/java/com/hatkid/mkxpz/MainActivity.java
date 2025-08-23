@@ -26,6 +26,9 @@ import android.net.Uri;
 import android.provider.Settings;
 import android.util.Log;
 import android.util.DisplayMetrics;
+
+import androidx.drawerlayout.widget.DrawerLayout;
+
 import java.util.Locale;
 import java.io.File;
 
@@ -111,12 +114,18 @@ public class MainActivity extends SDLActivity
                 mSingleton.finish();
             }
         }
+        super.onActivityResult(requestCode, resultCode, data);
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
+        // Override the setContentView from SDLActivity
+        setContentView(R.layout.activity_main);
+        // But we do want to hang mLayout on our layout
+        final DrawerLayout drawer = findViewById(R.id.drawer_layout);
+        drawer.addView(mLayout);
 
         mMainHandler = new Handler(getMainLooper());
 

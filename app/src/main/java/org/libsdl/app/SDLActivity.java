@@ -1,6 +1,6 @@
 package org.libsdl.app;
 
-import android.app.Activity;
+import androidx.appcompat.app.AppCompatActivity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.UiModeManager;
@@ -21,6 +21,7 @@ import android.hardware.Sensor;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.text.Editable;
@@ -58,7 +59,7 @@ import java.util.Locale;
 /**
     SDL Activity
 */
-public class SDLActivity extends Activity implements View.OnSystemUiVisibilityChangeListener {
+public class SDLActivity extends AppCompatActivity implements View.OnSystemUiVisibilityChangeListener {
     private static final String TAG = "SDL";
     private static final int SDL_MAJOR_VERSION = 2;
     private static final int SDL_MINOR_VERSION = 30;
@@ -500,7 +501,7 @@ public class SDLActivity extends Activity implements View.OnSystemUiVisibilityCh
     public static int getCurrentOrientation() {
         int result = SDL_ORIENTATION_UNKNOWN;
 
-        Activity activity = (Activity)getContext();
+        AppCompatActivity activity = (AppCompatActivity) getContext();
         if (activity == null) {
             return result;
         }
@@ -762,16 +763,16 @@ public class SDLActivity extends Activity implements View.OnSystemUiVisibilityCh
             }
             switch (msg.arg1) {
             case COMMAND_CHANGE_TITLE:
-                if (context instanceof Activity) {
-                    ((Activity) context).setTitle((String)msg.obj);
+                if (context instanceof AppCompatActivity) {
+                    ((AppCompatActivity) context).setTitle((String)msg.obj);
                 } else {
                     Log.e(TAG, "error handling message, getContext() returned no Activity");
                 }
                 break;
             case COMMAND_CHANGE_WINDOW_STYLE:
                 if (Build.VERSION.SDK_INT >= 19 /* Android 4.4 (KITKAT) */) {
-                    if (context instanceof Activity) {
-                        Window window = ((Activity) context).getWindow();
+                    if (context instanceof AppCompatActivity) {
+                        Window window = ((AppCompatActivity) context).getWindow();
                         if (window != null) {
                             if ((msg.obj instanceof Integer) && ((Integer) msg.obj != 0)) {
                                 int flags = View.SYSTEM_UI_FLAG_FULLSCREEN |
@@ -814,8 +815,8 @@ public class SDLActivity extends Activity implements View.OnSystemUiVisibilityCh
                 break;
             case COMMAND_SET_KEEP_SCREEN_ON:
             {
-                if (context instanceof Activity) {
-                    Window window = ((Activity) context).getWindow();
+                if (context instanceof AppCompatActivity) {
+                    Window window = ((AppCompatActivity) context).getWindow();
                     if (window != null) {
                         if ((msg.obj instanceof Integer) && ((Integer) msg.obj != 0)) {
                             window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
@@ -1152,7 +1153,7 @@ public class SDLActivity extends Activity implements View.OnSystemUiVisibilityCh
     public static double getDiagonal()
     {
         DisplayMetrics metrics = new DisplayMetrics();
-        Activity activity = (Activity)getContext();
+        AppCompatActivity activity = (AppCompatActivity) getContext();
         if (activity == null) {
             return 0.0;
         }
@@ -1778,7 +1779,7 @@ public class SDLActivity extends Activity implements View.OnSystemUiVisibilityCh
             return;
         }
 
-        Activity activity = (Activity)getContext();
+        AppCompatActivity activity = (AppCompatActivity)getContext();
         if (activity.checkSelfPermission(permission) != PackageManager.PERMISSION_GRANTED) {
             activity.requestPermissions(new String[]{permission}, requestCode);
         } else {
@@ -1888,6 +1889,16 @@ public class SDLActivity extends Activity implements View.OnSystemUiVisibilityCh
             return super.onGenericMotionEvent(event);
         }
         return super.onGenericMotionEvent(event);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data)
+    {
+        super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    protected void setRelativeLayoutContainer(RelativeLayout container) {
+        mLayout = container;
     }
 }
 
@@ -2097,6 +2108,8 @@ class SDLInputConnection extends BaseInputConnection {
         }
         mCommittedText = text;
     }
+
+
 
     public static native void nativeCommitText(String text, int newCursorPosition);
 
