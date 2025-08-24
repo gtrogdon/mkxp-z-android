@@ -5,6 +5,12 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <!-- The FrameLayout will hold your game content -->
+    <FrameLayout
+        android:id="@+id/content_frame"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
     <!-- Navigation drawer (slide from left) -->
     <com.google.android.material.navigation.NavigationView
         android:id="@+id/nav_view"
