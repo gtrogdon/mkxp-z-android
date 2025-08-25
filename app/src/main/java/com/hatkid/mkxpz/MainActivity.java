@@ -47,8 +47,6 @@ import java.io.File;
 import org.libsdl.app.SDLActivity;
 
 import com.google.android.material.navigation.NavigationView;
-import com.hatkid.mkxpz.gamepad.Gamepad;
-import com.hatkid.mkxpz.gamepad.GamepadConfig;
 
 public class MainActivity extends SDLActivity
 {
@@ -73,9 +71,7 @@ public class MainActivity extends SDLActivity
 
     protected static TextView tvFps;
 
-    // In-screen gamepad
-    private final Gamepad mGamepad = new Gamepad();
-    private boolean mGamepadInvisible = false;
+    private GamepadManager mGamepadManager;
 
     private void runSDLThread()
     {
@@ -176,15 +172,7 @@ public class MainActivity extends SDLActivity
         }
 
         // Setup in-screen gamepad
-        mGamepadInvisible = (isAndroidTV() || isChromebook());
-        GamepadConfig gpadConfig = new GamepadConfig();
-        mGamepad.init(gpadConfig, mGamepadInvisible);
-        mGamepad.setOnKeyDownListener(SDLActivity::onNativeKeyDown);
-        mGamepad.setOnKeyUpListener(SDLActivity::onNativeKeyUp);
-
-        if (mLayout != null) {
-            mGamepad.attachTo(this, mLayout);
-        }
+        mGamepadManager = new GamepadManager(this, mLayout);
 
         // Setup FPS textview
         tvFps = new TextView(this);
@@ -294,52 +282,32 @@ public class MainActivity extends SDLActivity
     @Override
     public boolean dispatchKeyEvent(KeyEvent evt)
     {
-        if (
-            evt.getKeyCode() != KeyEvent.KEYCODE_BACK &&
-            evt.getKeyCode() != KeyEvent.KEYCODE_VOLUME_UP &&
-            evt.getKeyCode() != KeyEvent.KEYCODE_VOLUME_DOWN &&
-            evt.getKeyCode() != KeyEvent.KEYCODE_VOLUME_MUTE && 
-            evt.getKeyCode() != KeyEvent.KEYCODE_HEADSETHOOK
-        ) {
-            // Hide gamepad view on key events when visible
-            if (!mGamepadInvisible) {
-                mGamepad.hideView();
-                mGamepadInvisible = true;
-            }
-        }
-
-        if (mGamepad.processGamepadEvent(evt))
+        if (mGamepadManager.handleDispatchKeyEvent(evt)) {
             return true;
-
+        }
         return super.dispatchKeyEvent(evt);
     }
 
     @Override
     public boolean dispatchTouchEvent(MotionEvent evt)
     {
-        // Show gamepad view on touch when hidden
-        if (mGamepadInvisible) {
-            mGamepad.showView();
-            mGamepadInvisible = false;
-        }
-
+        mGamepadManager.handleDispatchTouchEvent();
         return super.dispatchTouchEvent(evt);
     }
 
     @Override
     public boolean onGenericMotionEvent(MotionEvent evt)
     {
-        if (mGamepad.processDPadEvent(evt))
+        if (mGamepadManager.onGenericMotionEvent(evt)) {
             return true;
-
+        }
         return super.onGenericMotionEvent(evt);
     }
 
     // Handle game controller and keyboard key down events
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        // Forward gamepad button events to mGamepad for processing
-        if (mGamepad.processGamepadEvent(event)) {
+        if (mGamepadManager.onKeyDown(event)) {
             return true;
         }
         return super.onKeyDown(keyCode, event);
@@ -348,8 +316,7 @@ public class MainActivity extends SDLActivity
     // Handle game controller and keyboard key up events
     @Override
     public boolean onKeyUp(int keyCode, KeyEvent event) {
-        // Forward gamepad button events to mGamepad for processing
-        if (mGamepad.processGamepadEvent(event)) {
+        if (mGamepadManager.onKeyUp(event)) {
             return true;
         }
         return super.onKeyUp(keyCode, event);
