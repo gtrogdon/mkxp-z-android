@@ -7,7 +7,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
@@ -28,25 +27,13 @@ import android.net.Uri;
 import android.provider.Settings;
 import android.util.Log;
 import android.util.DisplayMetrics;
-import android.widget.Toast;
 
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
-import androidx.annotation.NonNull;
-import androidx.documentfile.provider.DocumentFile;
-import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.drawerlayout.widget.DrawerLayout; // Keep for findViewById
 
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.nio.file.Files;
 import java.util.Locale;
 import java.io.File;
 
 import org.libsdl.app.SDLActivity;
-
-import com.google.android.material.navigation.NavigationView;
 
 public class MainActivity extends SDLActivity
 {
@@ -59,10 +46,6 @@ public class MainActivity extends SDLActivity
     private static String OBB_MAIN_FILENAME;
     private static boolean DEBUG = false;
 
-    private ActivityResultLauncher<Intent> folderPickerLauncher;
-    private enum FileActionType { BACKUP, RESTORE }
-    private FileActionType pendingActionType = FileActionType.BACKUP;
-
     protected boolean mStarted = false;
 
     protected static Handler mMainHandler;
@@ -72,6 +55,7 @@ public class MainActivity extends SDLActivity
     protected static TextView tvFps;
 
     private GamepadManager mGamepadManager;
+    private NavigationDrawerManager mNavigationDrawerManager;
 
     private void runSDLThread()
     {
@@ -137,7 +121,6 @@ public class MainActivity extends SDLActivity
         // Override the setContentView from SDLActivity
         setContentView(R.layout.activity_main);
         // But we do want to hang mLayout on our layout
-        final DrawerLayout drawer = findViewById(R.id.drawer_layout);
         final FrameLayout content = findViewById(R.id.content_frame);
         content.addView(mLayout);
 
@@ -186,62 +169,9 @@ public class MainActivity extends SDLActivity
 
         mLayout.addView(tvFps);
 
-        folderPickerLauncher = registerForActivityResult(
-                new ActivityResultContracts.StartActivityForResult(),
-                result -> {
-                    if (result.getResultCode() == Activity.RESULT_OK) {
-                        Intent data = result.getData();
-                        if (data != null) {
-                            Uri treeUri = data.getData();
-
-                            // Persist access so you can reuse it later
-                            getContentResolver().takePersistableUriPermission(
-                                    treeUri,
-                                    Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION
-                            );
-
-                            if (pendingActionType == FileActionType.BACKUP)
-                                backupToUri(treeUri);
-                            else if (pendingActionType == FileActionType.RESTORE)
-                                restoreFromUri(treeUri);
-                        }
-                    }
-                }
-        );
-
-
-        // Set up navigation view handlers
-        NavigationView navigationView = findViewById(R.id.nav_view);
-        navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
-            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-                int id = item.getItemId();
-                Log.d("DrawerClick", "Backup clicked");
-
-                if (id == R.id.nav_backup) {
-                    Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
-                    intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                    intent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
-                    intent.addFlags(Intent.FLAG_GRANT_PREFIX_URI_PERMISSION);
-                    intent.addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
-                    pendingActionType = FileActionType.BACKUP;
-
-                    folderPickerLauncher.launch(intent);
-                } else if (id == R.id.nav_restore) {
-                    Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
-                    intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                    intent.addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
-                    intent.addFlags(Intent.FLAG_GRANT_PREFIX_URI_PERMISSION);
-                    pendingActionType = FileActionType.RESTORE;
-
-                    folderPickerLauncher.launch(intent);
-                }
-
-                // Close the drawer
-                drawer.closeDrawers();
-
-                return true;
-            }
-        });
+        // Initialize and setup NavigationDrawerManager
+        mNavigationDrawerManager = new NavigationDrawerManager(this);
+        mNavigationDrawerManager.setupNavigationDrawer();
     }
 
     @Override
@@ -322,78 +252,9 @@ public class MainActivity extends SDLActivity
         return super.onKeyUp(keyCode, event);
     }
 
-    private void backupToUri(Uri treeUri) {
-        File sourceDir = getFilesDir();
-        DocumentFile pickedDir = DocumentFile.fromTreeUri(this, treeUri);
-
-        if (pickedDir == null) {
-            Toast.makeText(this, "Invalid directory", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        try {
-            for (File file : sourceDir.listFiles()) {
-                DocumentFile targetFile = pickedDir.createFile("application/octet-stream", file.getName());
-                try (
-                        InputStream in = new FileInputStream(file);
-                        OutputStream out = getContentResolver().openOutputStream(targetFile.getUri())
-                ) {
-                    byte[] buffer = new byte[4096];
-                    int len;
-                    while ((len = in.read(buffer)) > 0) {
-                        out.write(buffer, 0, len);
-                    }
-                }
-            }
-
-            Toast.makeText(this, "Backup successful", Toast.LENGTH_SHORT).show();
-        } catch (Exception e) {
-            e.printStackTrace();
-            Toast.makeText(this, "Backup failed: " + e.getMessage(), Toast.LENGTH_LONG).show();
-        }
+    public void finish() {
+        mSingleton.finish();
     }
-
-    private void restoreFromUri(Uri sourceUri) {
-        DocumentFile sourceRoot = DocumentFile.fromTreeUri(this, sourceUri);
-        File targetRoot = getFilesDir(); // You can change this if restoring elsewhere
-
-        if (sourceRoot == null) {
-            Toast.makeText(this, "Invalid restore source", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        copyDirectoryRecursive(sourceRoot, targetRoot);
-    }
-
-    private void copyDirectoryRecursive(DocumentFile sourceDir, File targetDir) {
-        if (!targetDir.exists()) {
-            targetDir.mkdirs();
-        }
-
-        for (DocumentFile docFile : sourceDir.listFiles()) {
-            File targetFile = new File(targetDir, docFile.getName());
-
-            if (docFile.isDirectory()) {
-                copyDirectoryRecursive(docFile, targetFile);
-            } else if (docFile.isFile()) {
-                try (
-                        InputStream in = getContentResolver().openInputStream(docFile.getUri());
-                        OutputStream out = Files.newOutputStream(targetFile.toPath())
-                ) {
-                    byte[] buffer = new byte[4096];
-                    int len;
-                    while ((len = in.read(buffer)) > 0) {
-                        out.write(buffer, 0, len);
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    Toast.makeText(this, "Failed to restore " + docFile.getName(), Toast.LENGTH_SHORT).show();
-                }
-            }
-        }
-    }
-
-
 
     /**
      * This method is for arguments for launching native mkxp-z.
